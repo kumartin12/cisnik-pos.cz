@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Číšník POS – Pokladna pro hospody a restaurace</title>
+<meta name="description" content="Jednoduchá iOS pokladna pro hospody, restaurace a bary. Bez předplatného, bez kompromisů. Stoly, objednávky, účtenky, tisk. Jednou zaplatíte – navždy vaše.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --orange: #E8620A; --orange-light: #FF7A1F; --orange-pale: #FFF4EC;
+    --cream: #FAFAF7; --dark: #1A1209; --text: #2D2018;
+    --text-light: #8C7060; --border: #E8DDD5; --white: #FFFFFF;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); line-height: 1.6; overflow-x: hidden; }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 48px;
+    background: rgba(250,250,247,0.92); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { font-family: 'Fraunces', serif; font-size: 1.4rem; font-weight: 700; color: var(--dark); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+  .nav-logo span { color: var(--orange); }
+  .nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
+  .nav-links a { color: var(--text-light); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--orange); }
+  .nav-cta { background: var(--orange); color: white !important; padding: 10px 22px; border-radius: 100px; transition: background 0.2s !important; }
+  .nav-cta:hover { background: var(--orange-light) !important; }
+
+  .hero {
+    min-height: 100vh; display: flex; align-items: center;
+    padding: 120px 48px 80px; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -200px; right: -200px;
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(232,98,10,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero::after {
+    content: '🍺'; position: absolute; font-size: 320px;
+    bottom: -60px; right: -20px; opacity: 0.05; line-height: 1;
+  }
+  .hero-inner { max-width: 1200px; margin: 0 auto; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+
+  .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--orange-pale); border: 1px solid rgba(232,98,10,0.2); color: var(--orange); font-size: 0.8rem; font-weight: 500; padding: 6px 14px; border-radius: 100px; margin-bottom: 24px; }
+  .hero-badge::before { content: '★'; }
+
+  .hero h1 { font-family: 'Fraunces', serif; font-size: clamp(2.8rem, 5vw, 4.2rem); font-weight: 900; line-height: 1.1; color: var(--dark); margin-bottom: 24px; }
+  .hero h1 em { font-style: italic; color: var(--orange); }
+  .hero-sub { font-size: 1.1rem; color: var(--text-light); line-height: 1.7; margin-bottom: 40px; max-width: 480px; font-weight: 300; }
+  .hero-actions { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+
+  .btn-primary { display: inline-flex; align-items: center; gap: 10px; background: var(--dark); color: white; padding: 16px 28px; border-radius: 14px; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: transform 0.2s, background 0.2s; }
+  .btn-primary:hover { background: var(--orange); transform: translateY(-2px); }
+  .btn-primary svg { width: 20px; height: 20px; }
+  .hero-price { color: var(--text-light); font-size: 0.9rem; }
+  .hero-price strong { color: var(--orange); font-size: 1.1rem; }
+
+  .hero-visual { display: flex; justify-content: center; align-items: center; position: relative; }
+  .phone-frame {
+    width: 280px; height: 560px; background: var(--dark); border-radius: 44px; padding: 12px;
+    box-shadow: 0 40px 80px rgba(26,18,9,0.3), 0 0 0 1px rgba(255,255,255,0.05) inset;
+    position: relative; animation: float 4s ease-in-out infinite;
+  }
+  @keyframes float { 0%, 100% { transform: translateY(0px) rotate(-2deg); } 50% { transform: translateY(-16px) rotate(-2deg); } }
+  .phone-screen { width: 100%; height: 100%; background: #0F0B07; border-radius: 34px; overflow: hidden; display: flex; flex-direction: column; }
+  .phone-statusbar { height: 44px; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 24px 8px; }
+  .phone-time { color: white; font-size: 12px; font-weight: 600; }
+  .phone-icons { color: white; font-size: 10px; }
+  .phone-nav { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px 12px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .phone-title { color: white; font-size: 17px; font-weight: 700; font-family: 'Fraunces', serif; }
+  .phone-btn { color: var(--orange); font-size: 11px; }
+  .phone-table { margin: 10px; background: rgba(255,255,255,0.05); border-radius: 14px; padding: 12px 14px; border: 1px solid rgba(232,98,10,0.3); }
+  .phone-table-name { color: white; font-size: 13px; font-weight: 600; }
+  .phone-table-amount { color: var(--orange); font-size: 18px; font-weight: 800; margin-top: 2px; }
+  .phone-items { padding: 0 10px; }
+  .phone-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 4px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .phone-item-left { display: flex; align-items: center; gap: 8px; }
+  .phone-item-emoji { font-size: 18px; }
+  .phone-item-name { color: rgba(255,255,255,0.85); font-size: 11px; }
+  .phone-item-price { color: var(--orange); font-size: 11px; font-weight: 600; }
+  .phone-bottom { margin-top: auto; padding: 10px; background: rgba(0,0,0,0.3); }
+  .phone-pay-btn { background: var(--orange); color: white; border-radius: 12px; padding: 10px; text-align: center; font-size: 12px; font-weight: 700; }
+  .phone-tabs { display: flex; justify-content: space-around; padding: 8px 0 4px; border-top: 1px solid rgba(255,255,255,0.08); }
+  .phone-tab { color: rgba(255,255,255,0.4); font-size: 8px; text-align: center; }
+  .phone-tab.active { color: var(--orange); }
+  .phone-tab-icon { font-size: 14px; display: block; margin-bottom: 2px; }
+
+  .float-card { position: absolute; background: white; border-radius: 16px; padding: 12px 16px; box-shadow: 0 12px 32px rgba(26,18,9,0.15); font-size: 0.8rem; white-space: nowrap; }
+  .float-card-1 { top: 60px; right: -30px; animation: float2 3s ease-in-out infinite; }
+  .float-card-2 { bottom: 100px; left: -40px; animation: float2 3s ease-in-out infinite 1.5s; }
+  @keyframes float2 { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  .float-card .label { color: var(--text-light); font-size: 0.7rem; }
+  .float-card .value { color: var(--dark); font-weight: 700; font-size: 1rem; }
+  .dot { display: inline-block; width: 8px; height: 8px; background: #2ECC71; border-radius: 50%; margin-right: 6px; }
+
+  .section { padding: 100px 48px; max-width: 1200px; margin: 0 auto; }
+  .section-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--orange); margin-bottom: 16px; }
+  .section-title { font-family: 'Fraunces', serif; font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; color: var(--dark); line-height: 1.2; margin-bottom: 16px; }
+  .section-sub { color: var(--text-light); font-size: 1.05rem; max-width: 560px; font-weight: 300; }
+
+  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 60px; }
+  .feature-card { background: white; border: 1px solid var(--border); border-radius: 20px; padding: 32px; transition: transform 0.2s, box-shadow 0.2s; }
+  .feature-card:hover { transform: translateY(-4px); box-shadow: 0 20px 48px rgba(26,18,9,0.08); }
+  .feature-icon { font-size: 2rem; margin-bottom: 20px; display: block; }
+  .feature-card h3 { font-family: 'Fraunces', serif; font-size: 1.2rem; font-weight: 700; color: var(--dark); margin-bottom: 10px; }
+  .feature-card p { color: var(--text-light); font-size: 0.9rem; line-height: 1.6; font-weight: 300; }
+
+  .divider { height: 1px; background: var(--border); max-width: 1200px; margin: 0 auto; }
+
+  .pricing-wrap { background: var(--dark); padding: 100px 48px; position: relative; overflow: hidden; }
+  .pricing-wrap::before {
+    content: ''; position: absolute; top: -300px; left: 50%; transform: translateX(-50%);
+    width: 800px; height: 800px;
+    background: radial-gradient(circle, rgba(232,98,10,0.15) 0%, transparent 60%);
+    border-radius: 50%; pointer-events: none;
+  }
+  .pricing-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  .pricing-left .section-label { color: var(--orange-light); }
+  .pricing-left .section-title { color: white; }
+  .pricing-left .section-sub { color: rgba(255,255,255,0.5); }
+  .pricing-list { list-style: none; margin-top: 32px; display: flex; flex-direction: column; gap: 14px; }
+  .pricing-list li { display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,0.75); font-size: 0.95rem; }
+  .pricing-list li::before { content: '✓'; display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; background: rgba(232,98,10,0.2); color: var(--orange-light); border-radius: 50%; font-size: 0.7rem; font-weight: 700; flex-shrink: 0; }
+
+  .price-card { background: white; border-radius: 28px; padding: 48px; text-align: center; position: relative; }
+  .price-badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--orange); color: white; font-size: 0.75rem; font-weight: 700; padding: 6px 18px; border-radius: 100px; white-space: nowrap; letter-spacing: 0.05em; text-transform: uppercase; }
+  .price-name { font-family: 'Fraunces', serif; font-size: 1.1rem; color: var(--text-light); margin-bottom: 8px; }
+  .price-amount { font-family: 'Fraunces', serif; font-size: 3.5rem; font-weight: 900; color: var(--dark); line-height: 1; margin-bottom: 6px; }
+  .price-period { color: var(--text-light); font-size: 0.85rem; margin-bottom: 32px; }
+  .price-divider { height: 1px; background: var(--border); margin: 24px 0; }
+  .price-features { list-style: none; text-align: left; margin-bottom: 36px; display: flex; flex-direction: column; gap: 12px; }
+  .price-features li { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: var(--text); }
+  .price-features li::before { content: '✓'; color: var(--orange); font-weight: 700; font-size: 0.85rem; }
+
+  .btn-appstore { display: inline-flex; align-items: center; justify-content: center; gap: 12px; background: var(--dark); color: white; padding: 16px 32px; border-radius: 16px; text-decoration: none; font-weight: 600; width: 100%; transition: background 0.2s, transform 0.1s; font-size: 0.95rem; }
+  .btn-appstore:hover { background: var(--orange); transform: translateY(-2px); }
+  .price-note { margin-top: 16px; color: var(--text-light); font-size: 0.8rem; }
+
+  footer { background: var(--dark); border-top: 1px solid rgba(255,255,255,0.06); padding: 48px; text-align: center; }
+  .footer-logo { font-family: 'Fraunces', serif; font-size: 1.6rem; font-weight: 700; color: white; margin-bottom: 16px; }
+  .footer-logo span { color: var(--orange); }
+  .footer-links { display: flex; justify-content: center; gap: 32px; list-style: none; margin-bottom: 32px; }
+  .footer-links a { color: rgba(255,255,255,0.4); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--orange); }
+  .footer-copy { color: rgba(255,255,255,0.25); font-size: 0.8rem; }
+
+  .fade-in { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    .hero { padding: 100px 24px 60px; }
+    .hero-inner { grid-template-columns: 1fr; gap: 60px; }
+    .hero-visual { order: -1; }
+    .section { padding: 60px 24px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .pricing-wrap { padding: 60px 24px; }
+    .pricing-inner { grid-template-columns: 1fr; gap: 48px; }
+    footer { padding: 40px 24px; }
+    .footer-links { flex-wrap: wrap; gap: 16px; }
+    .float-card-1, .float-card-2 { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="nav-logo">🍺 Číšník<span>POS</span></a>
+  <ul class="nav-links">
+    <li><a href="#funkce">Funkce</a></li>
+    <li><a href="#cenik">Ceník</a></li>
+    <li><a href="https://apps.apple.com/cz/app/cisnik-pos/id6760232222?l=cs" target="_blank" class="nav-cta">Stáhnout</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge">5,0 ★ na App Store</div>
+      <h1>Pokladna pro hospody<br>a <em>restaurace</em></h1>
+      <p class="hero-sub">Jednoduchá iOS appka která zvládne stoly, objednávky, účtenky i tisk — bez předplatného, bez komplikací. Jednou zaplatíte a máte ji navždy.</p>
+      <div class="hero-actions">
+        <a href="https://apps.apple.com/cz/app/cisnik-pos/id6760232222?l=cs" class="btn-primary" target="_blank">
+          <svg viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          Stáhnout z App Store
+        </a>
+        <div class="hero-price">Jednorázově <strong>9 990 Kč</strong></div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="phone-frame">
+        <video
+          autoplay muted loop playsinline
+          style="width:100%; height:100%; object-fit:cover; border-radius:34px; display:block;"
+          src="cisnik-demo.mp4"
+        ></video>
+      </div>
+      <div class="float-card float-card-1">
+        <div class="label">Dnešní tržba</div>
+        <div class="value">12 450 Kč</div>
+      </div>
+      <div class="float-card float-card-2">
+        <div class="label"><span class="dot"></span>Tiskárna online</div>
+        <div class="value" style="font-size:0.85rem; color: var(--orange);">Účtenka vytištěna ✓</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="section" id="funkce">
+  <div class="section-label">Co Číšník POS umí</div>
+  <h2 class="section-title">Vše co hospoda potřebuje,<br>nic navíc</h2>
+  <p class="section-sub">Navrženo pro české prostředí — pro hospodské kteří chtějí jednoduchou a spolehlivou evidenci bez zbytečné složitosti.</p>
+  <div class="features-grid">
+    <div class="feature-card fade-in">
+      <span class="feature-icon">🪑</span>
+      <h3>Stoly a objednávky</h3>
+      <p>Nastavte si stoly podle svého podniku — bar, terasa, salónek. Přidávejte položky jedním tapnutím přímo z menu.</p>
+    </div>
+    <div class="feature-card fade-in">
+      <span class="feature-icon">📋</span>
+      <h3>Vlastní menu</h3>
+      <p>Sestavte jídelní a nápojový lístek s emoji, cenami a kategoriemi. Položky lze kdykoli upravit nebo přeřadit.</p>
+    </div>
+    <div class="feature-card fade-in">
+      <span class="feature-icon">🖨️</span>
+      <h3>Tisk na tiskárnu</h3>
+      <p>Přímý tisk účtenek na LAN termální tiskárnu bez počítače a bez driverů. Stačí zadat IP adresu tiskárny.</p>
+    </div>
+    <div class="feature-card fade-in">
+      <span class="feature-icon">📄</span>
+      <h3>PDF účtenky s QR</h3>
+      <p>Každá platba vygeneruje profesionální PDF účtenku s IČO, DIČ a QR kódem pro okamžitou platbu přes mobil.</p>
+    </div>
+    <div class="feature-card fade-in">
+      <span class="feature-icon">👥</span>
+      <h3>Rozdělení účtu</h3>
+      <p>Hosté chtějí platit zvlášť? Vyberete položky pro každého hosta a vygenerujete dílčí účet.</p>
+    </div>
+    <div class="feature-card fade-in">
+      <span class="feature-icon">📊</span>
+      <h3>Denní hárek</h3>
+      <p>Na konci směny vidíte kompletní přehled tržeb za dnešek, týden nebo libovolné rozmezí. Export jako PDF.</p>
+    </div>
+  </div>
+</section>
+
+<div class="pricing-wrap" id="cenik">
+  <div class="pricing-inner">
+    <div class="pricing-left">
+      <div class="section-label">Ceník</div>
+      <h2 class="section-title">Jednou zaplatíte.<br>Navždy vaše.</h2>
+      <p class="section-sub">Žádné měsíční poplatky, žádné skryté poplatky za funkce. Vše běží lokálně na vašem iPhonu nebo iPadu.</p>
+      <ul class="pricing-list">
+        <li>Bez předplatného</li>
+        <li>Bez omezení stolů nebo položek</li>
+        <li>Všechny budoucí aktualizace zdarma</li>
+        <li>Funguje offline — bez internetu</li>
+        <li>iCloud sync mezi zařízeními</li>
+        <li>Podpora iOS 16 a novější</li>
+      </ul>
+    </div>
+    <div>
+      <div class="price-card">
+        <div class="price-badge">🍺 Jednorázová platba</div>
+        <div class="price-name">Číšník POS</div>
+        <div class="price-amount">9 990</div>
+        <div class="price-period">Kč · jednorázově, navždy</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li>Správa stolů a objednávek</li>
+          <li>Vlastní menu s emoji</li>
+          <li>PDF účtenky s QR platbou</li>
+          <li>Tisk na termální tiskárnu (LAN)</li>
+          <li>Rozdělení účtu</li>
+          <li>Denní hárek a statistiky</li>
+          <li>iCloud synchronizace</li>
+          <li>Přehled a archiv dokladů</li>
+        </ul>
+        <a href="https://apps.apple.com/cz/app/cisnik-pos/id6760232222?l=cs" class="btn-appstore" target="_blank">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          Koupit na App Store
+        </a>
+        <p class="price-note">Dostupné pro iPhone a iPad · iOS 16+</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">🍺 Číšník<span>POS</span></div>
+  <ul class="footer-links">
+    <li><a href="#funkce">Funkce</a></li>
+    <li><a href="#cenik">Ceník</a></li>
+    <li><a href="https://apps.apple.com/cz/app/cisnik-pos/id6760232222?l=cs" target="_blank">App Store</a></li>
+    <li><a href="https://sites.google.com/view/cisnik/domovsk%C3%A1-str%C3%A1nka" target="_blank">Ochrana soukromí</a></li>
+  </ul>
+  <p class="footer-copy">© 2026 Martin Kučera · cisnik-pos.cz · Všechna práva vyhrazena</p>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 120);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
