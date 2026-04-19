@@ -37,6 +37,8 @@
     min-height: 100vh; display: flex; align-items: center;
     padding: 120px 48px 80px; position: relative; overflow: hidden;
   }
+  .hero::after { pointer-events: none; }
+  .hero::before { pointer-events: none; }
   .hero::before {
     content: ''; position: absolute; top: -200px; right: -200px;
     width: 700px; height: 700px;
@@ -57,7 +59,7 @@
   .hero-sub { font-size: 1.1rem; color: var(--text-light); line-height: 1.7; margin-bottom: 40px; max-width: 480px; font-weight: 300; }
   .hero-actions { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
 
-  .btn-primary { display: inline-flex; align-items: center; gap: 10px; background: var(--dark); color: white; padding: 16px 28px; border-radius: 14px; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: transform 0.2s, background 0.2s; }
+  .btn-primary { display: inline-flex; align-items: center; gap: 10px; background: var(--dark); color: white; padding: 16px 28px; border-radius: 14px; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: transform 0.2s, background 0.2s; position: relative; z-index: 10; }
   .btn-primary:hover { background: var(--orange); transform: translateY(-2px); }
   .btn-primary svg { width: 20px; height: 20px; }
   .hero-price { color: var(--text-light); font-size: 0.9rem; }
